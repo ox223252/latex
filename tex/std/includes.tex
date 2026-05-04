@@ -1,0 +1,170 @@
+% Licence CC-BY-SA
+% produit par ox223252
+% document de base pour modification
+\documentclass[a4paper]{report}
+\usepackage{verbatim}   % permet d'utiliser verbatim
+\usepackage{tcolorbox}  % permet d'afficher des boites autour de certain element
+\usepackage[nobottomtitles*]{titlesec}   % permet de modifier les titres, l'option permet d'eviter le titre en fin de page
+\usepackage{graphicx}   % permet d'inclure des images
+						% for '\resizebox` macro
+\usepackage[utf8]{inputenc}     % permet de changer l'encodage
+\usepackage[T1]{fontenc}        % et d'utiliser le package frencais
+\usepackage[french]{babel}     % utilisation des charactères français
+\usepackage{float}      % permet d'utiliser \begin{figure}[H]
+\usepackage{lscape}     % affichegage de page paysage
+\usepackage{pmboxdraw}  % pour afficher les charactere de tree
+\usepackage{amssymb,pdftexcmds,xparse}
+\usepackage{cite}       % permet les citations
+\usepackage[babel=true]{csquotes}
+\usepackage[colorlinks=true]{hyperref}   % href link, pdf editables : https://la-bibliotex.fr/2020/04/11/creer-des-pdf-editables-avec-latex/
+\usepackage{pst-uml}    % cf https://www.mathforu.com/hors-programme/latex-dessin-geometrique-en-latex-avec-pstricks/
+\usepackage{ulem}       % barrer du text 
+\usepackage{ccicons}    % icons : https://la-bibliotex.fr/2019/02/10/des-icones-a-infini-dans-latex/
+\usepackage{subfig}     % sous figure 1a, 1b, ... : https://la-bibliotex.fr/2019/01/31/package-latex-decouverte-1/
+\usepackage[final]{pdfpages}    % insertion de page de pdf : https://la-bibliotex.fr/2019/01/31/package-latex-decouverte-1/
+\usepackage[yyyymmdd,hhmmss]{datetime} % ajout de la date \today \currenttime
+\usepackage[acronym,nomain]{glossaries} % use glossaries-package
+\usepackage{siunitx} % dessins de graphiques depuis banque de données
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pdftricks} % convert your existing postscript files to PDF : alow to use tikz width pdflatex ?
+\usepackage{ulem} % barrer du text \sout{Texte à barrer} \xout{Texte à hachurer}
+\usepackage{array, multirow}
+\usepackage{fancyhdr} % entête
+\usepackage{fontawesome5} % font awesome
+
+\usepackage[european,straightvoltages,siunitx]{circuitikz} % circuit elecs
+\usetikzlibrary{babel}
+
+\usepackage[left=3.5cm,right=3.5cm,top=2cm,bottom=2cm]{geometry} % changement des marges
+
+% pip install pygments
+\usepackage{minted}     % code en couleur
+\setlength\partopsep{-\topsep}
+\addtolength\partopsep{-\parskip}
+% \usemintedstyle{rrt}
+
+\titleformat{\chapter}[display]{\bfseries\Huge}{}{0em}{}[\vspace{-0.5em}]
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist
+
+\usepackage{cmbright}
+
+%
+% permet de faire des checbox
+%
+\tikzset{
+	box/.style={
+		minimum size=0.225cm,
+		inner sep=0pt,
+		draw,
+	},
+	insert mark/.style={
+		append after command={
+			node[inner sep=0pt,#1]
+			at (\tikzlastnode.center){$\checkmark$}
+		}
+	},
+	insert bad mark/.style={
+		append after command={
+			[shorten <=\pgflinewidth,shorten >=\pgflinewidth]
+			(\tikzlastnode.north west)edge[#1](\tikzlastnode.south east)
+			(\tikzlastnode.south west)edge[#1](\tikzlastnode.north east)
+		}
+	},
+}
+
+\makeatletter \NewDocumentCommand{\tikzcheckmark}{O{} m}{
+	\ifnum\pdf@strcmp{#2}{mark}=\z@
+		\tikz[baseline=-0.5ex]\node[box,insert mark={#1},#1]{};
+	\fi
+	\ifnum\pdf@strcmp{#2}{bad mark}=\z@
+		\tikz[baseline=-0.5ex]\node[box,insert bad mark={#1},#1]{};
+	\fi
+	\ifnum\pdf@strcmp{#2}{no mark}=\z@
+		\tikz[baseline=-0.5ex]\node[box,#1]{};
+	\fi
+}
+\makeatother
+
+% \tikzcheckmark{no mark}
+% \tikzcheckmark{mark}
+% \tikzcheckmark{bad mark}
+
+% permet de dessiner un code avec coloration syntaxique et encadrement
+\newenvironment{cbox}[1]
+{
+	\def\temp{#1}\ifx\temp\empty
+		\def\a{}
+	\else
+		\def\a{\caption{#1}}
+	\fi
+
+	\begin{figure}[H]
+	\begin{changemargin}{-2.5cm}{-2.5cm}
+	\begin{tcolorbox}
+}
+{
+	\end{tcolorbox}
+	\end{changemargin}
+	\a
+	\end{figure}
+}
+
+%
+% environement pour include des mails
+%
+\newenvironment{mail}[4]
+{
+	\subsection{#1}
+		\begin{changemargin}{-2.5cm}{-2.5cm}
+		\begin{tcolorbox}
+		\begin{itemize}
+			\item From: {#2},
+			\item To: {#3},
+			\item Date: {#4},
+		\end{itemize}
+}
+{
+		\end{tcolorbox}
+		\end{changemargin}
+}
+
+% permet d'afficher un extrait de document
+
+\newsavebox{\auteurbm}
+
+%
+% environement pour citation à droite
+%
+% param : nom de l'auteur
+\newenvironment{extraitR}[1]{\small\slshape
+\savebox{\auteurbm}{\upshape\sffamily#1}
+\begin{flushright}}{\\[4pt]\usebox{\auteurbm}
+\end{flushright}\normalsize\upshape}
+
+%
+% environement pour citation à gauche
+%
+% param : nom de l'auteur
+\newenvironment{extraitL}[1]{\small\slshape
+\savebox{\auteurbm}{\upshape\sffamily#1}
+\begin{flushleft}}{\\[4pt]\usebox{\auteurbm}
+\end{flushleft}\normalsize\upshape}
+
+\titleformat{\chapter}[display]{\bfseries\Huge}{}{0em}{}[\vspace{-0.5em}]
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist
+
+
+%
+% flow chart
+%
+\usetikzlibrary{shapes.geometric, arrows}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+

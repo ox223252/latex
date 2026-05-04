@@ -1,0 +1,145 @@
+#!/bin/bash
+
+BUILD="latex"
+LAST=""
+UPLOAD="KO"
+UP_DIR=""
+TEX=""
+PDF=""
+FLAG=""
+OUPTUT="out"
+
+for PARAM in $@
+do
+	case $PARAM in
+		-h|--help)
+			echo display this window
+			echo "-f  : ($TEX)"
+			echo "-b  : ($BUILD)"
+			echo "-fb : ($BUILD)"
+			echo "-gu : ($UPLOAD : $UP_DIR)"
+			echo "-o  : ($OUTPUT)"
+			exit
+			;;
+		-f)
+			LAST="file"
+			;;
+		-b)
+			LAST="build"
+			;;
+		-fb)
+			LAST="fullBuild"
+			;;
+		-gu)
+			UPLOAD="OK"
+			LAST="google_upload"
+			;;
+		-o)
+			LAST="out"
+			;;
+		*)
+			case $LAST in
+				google_upload)
+					if [ "$UP_DIR" != "" ]; then
+						echo $UP_DIR will be replaced by $PARAM
+						echo $PARAM wil be the next google drive upload directory
+					fi
+					UP_DIR=$PARAM
+					;;
+				file)
+					TEX="$TEX $PARAM"
+					;;
+				build)
+					BUILD=$PARAM$BUILD
+					;;
+				fullBuild)
+					BUILD=$PARAM
+					;;
+				out)
+					OUTPUT=$PARAM
+					;;
+				*)
+					echo unknow param $PARAM
+					;;
+			esac
+			;;
+	esac
+done
+
+echo "$BUILD" ; sleep 1
+
+if [ "$TEX" == "" ]; then
+	TEX=$(find . | grep -E "*.tex$")
+fi
+
+if [ "$BUILD" == "latex" ]; then
+	files=()
+	while IFS= read -r f; do
+	    files+=("$f")
+	done < <(find res | grep -E "\.(png|jpg|jpeg|bmp|pdf|svg)")
+
+	mkdir -p used/
+
+	for input in "${files[@]}"
+	do
+		# input="${input/\"/}"
+		out="$(echo $input | rev | cut -d'.' -f2- | rev).eps"
+		printf "%-30s -> %s\n" $input	$out
+		[ ! -e $out ] && convert $input eps2:$out
+		mv $input used/
+	done
+fi
+
+for DOC in $TEX
+do
+	echo $DOC
+	BASE=$( echo $DOC | rev | cut -d '.' -f 2- | cut -d "/" -f 1 | rev )
+
+	echo $BASE
+	PS=$BASE".ps"
+	PDF=$BASE".pdf"
+	DVI=$BASE".dvi"
+	FLAG=$( [ "$(grep minted $DOC)" != "" ] && echo "-shell-escape" || echo "" )
+
+	# first compilation
+	$BUILD $FLAG $DOC --output-directory=out
+	RET_1=$?
+
+	# generate the bib element if needed
+	if [ "$RET_1" == 0 ];
+	then
+		bibtex $BASE
+		RET_2=$?
+	fi
+
+	# second compilation if no bib or first if bib exist
+	if [ "$RET_1" == 0 ];
+	then
+		$BUILD $FLAG $DOC
+		RET=$?
+	fi
+
+	# second compilation if bib exist
+	if [ "$RET" == 0 ] && [ "$RET_2" == 0 ];
+	then
+		$BUILD $FLAG $DOC
+		RET=$?
+	fi
+
+	# conversion en pdf
+	if [ "$RET" == 0 ] && [ -f $DVI ];
+	then
+		dvips $DVI -o $PS
+		ps2pdf $PS $PDF
+		RET=$?
+	fi
+	echo $DVI
+
+	[ "$RET" == 0 ] && echo -e "\e[1;32mall done perfectly\e[0m"
+
+	[ "$RET" == 0 ] && [ "$UPLOAD" == "OK" ] && google_upload $PDF $UP_DIR
+done
+
+rm $(ls main* | grep -E ".(ps|dvi|aux|bbl|blg|lof|log|out|toc|lot)$")
+rm -rf _minted
+
