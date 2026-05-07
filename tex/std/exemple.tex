@@ -37,7 +37,23 @@
 % hyperref : pdf editables : https://la-bibliotex.fr/2020/04/11/creer-des-pdf-editables-avec-latex/
 %
 
-% \chapter{Formulaires}
+\chapter{Formulaires}
+	\section{Champs}
+		\formfield[10cm]{Mme/M. :}
+		\formfield[10cm]{Adresse :}
+		\formfield[10cm]{Code postal :}
+
+
+	\section{Checbox}
+		\begin{itemize}
+			\item \tikzcheckmark{}
+			\item \tikzcheckmark{no mark}
+			\item \tikzcheckmark{mark}
+			\item \tikzcheckmark{bad mark}
+		\end{itemize}
+
+	\section{Note}
+		Les formulaires interactifs ne sont pas possible sans utiliser PDFlatex, ici, ce n'est pas considéré
 % 	\begin{Form}
 % 		\TextField{Mme/M. : }
 % 		\CheckBox{Case à cocher : }
@@ -183,10 +199,6 @@
 		text issue à ecrire
 	\end{extraitL}
 
-\chapter{checbox}
-	\tikzcheckmark{}
-	\tikzcheckmark{mark}
-	\tikzcheckmark{bad mark}
 
 
 %

@@ -84,6 +84,9 @@
 	\ifnum\pdf@strcmp{#2}{no mark}=\z@
 		\tikz[baseline=-0.5ex]\node[box,#1]{};
 	\fi
+	\ifnum\pdf@strcmp{#2}{}=\z@
+		\tikz[baseline=-0.5ex]\node[box,#1]{};
+	\fi
 }
 \makeatother
 
@@ -168,3 +171,7 @@
 \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
+\newcommand{\formfield}[2][6cm]{%
+	\settowidth{\labelwidth}{#2~}%
+	\noindent #2~\underline{\hspace{\dimexpr #1 - \labelwidth\relax}}\\[0.4cm]
+}
